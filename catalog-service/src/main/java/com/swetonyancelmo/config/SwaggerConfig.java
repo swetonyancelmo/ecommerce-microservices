@@ -14,9 +14,6 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                // Caminho relativo: o Swagger UI envia as requisições para a mesma
-                // origem em que foi carregado (o api-gateway), que então roteia
-                // para este serviço. Evita apontar para a porta interna (8081) e CORS.
                 .servers(List.of(new Server().url("/")))
                 .info(new Info()
                     .title("Catalog Service API")

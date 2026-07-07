@@ -3,19 +3,15 @@ package com.swetonyancelmo.controller;
 import com.swetonyancelmo.dto.CreateProductDTO;
 import com.swetonyancelmo.dto.ProductResponseDTO;
 import com.swetonyancelmo.service.ProductService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Product Controller", description = "API para gerenciamento de produtos")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
