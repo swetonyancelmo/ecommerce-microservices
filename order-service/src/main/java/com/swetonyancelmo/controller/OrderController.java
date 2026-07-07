@@ -1,8 +1,8 @@
 package com.swetonyancelmo.controller;
 
-import com.swetonyancelmo.integration.InventoryClient;
-import com.swetonyancelmo.model.Order;
-import com.swetonyancelmo.repository.OrderRepository;
+import com.swetonyancelmo.dto.CreateOrderDTO;
+import com.swetonyancelmo.dto.OrderResponseDTO;
+import com.swetonyancelmo.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,32 +14,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderRepository repository;
-    private final InventoryClient inventoryClient;
+    private final OrderService service;
 
     @PostMapping
-    public ResponseEntity<String> placeOrder(@RequestBody Order orderRequest) {
-        try {
-            Boolean hasStock = inventoryClient.isInStock(orderRequest.getProductId(), orderRequest.getQuantity());
-
-            if (hasStock != null && hasStock) {
-                inventoryClient.deductStock(orderRequest.getProductId(), orderRequest.getQuantity());
-                orderRequest.setStatus("COMPLETED");
-                repository.save(orderRequest);
-
-                return ResponseEntity.ok("Pedido criado com sucesso");
-            } else {
-                orderRequest.setStatus("FAILED_NO_STOCK");
-                repository.save(orderRequest);
-                return ResponseEntity.badRequest().body("Falha ao criar pedido: Estoque insuficiente");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro de comunicação com o serviço de estoque: " + e.getMessage());
-        }
+    public ResponseEntity<String> placeOrder(@RequestBody CreateOrderDTO dto) {
+        String responseMessage = service.placeOrder(dto);
+        return ResponseEntity.ok(responseMessage);
     }
 
     @GetMapping
-    public List<Order> getAllOrders() {
-        return repository.findAll();
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
+        return ResponseEntity.ok(service.getAllOrders());
     }
 }
