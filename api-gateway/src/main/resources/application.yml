@@ -28,13 +28,3 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
-springdoc:
-  swagger-ui:
-    urls:
-      - name: Serviço de Produtos
-        url: /api/products/v3/api-docs
-      # - name: Serviço de Estoque
-      #   url: /api/inventory/v3/api-docs
-      # - name: Serviço de Pedidos
-      #   url: /api/orders/v3/api-docs
