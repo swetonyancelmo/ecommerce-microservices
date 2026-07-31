@@ -3,6 +3,7 @@ package com.swetonyancelmo.controller;
 import com.swetonyancelmo.dto.CreateProductDTO;
 import com.swetonyancelmo.dto.ProductResponseDTO;
 import com.swetonyancelmo.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody CreateProductDTO dto) {
+    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody CreateProductDTO dto) {
         return new ResponseEntity<>(service.createProduct(dto), HttpStatus.CREATED);
     }
 
