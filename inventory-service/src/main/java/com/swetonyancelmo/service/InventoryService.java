@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
@@ -18,14 +16,9 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public Boolean isInStock(Long productId, Integer quantity) {
-        Optional<Inventory> inventoryOpt = repository.findById(productId);
-
-        if (inventoryOpt.isPresent()) {
-            boolean hasStock = inventoryOpt.get().getQuantity() >= quantity;
-            return true;
-        }
-
-        return false;
+        return repository.findByProductId(productId)
+                .map(inventory -> inventory.getQuantity() >= quantity)
+                .orElse(false);
     }
 
     @Transactional
