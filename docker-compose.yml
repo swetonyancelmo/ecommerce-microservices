@@ -15,6 +15,59 @@ services:
     networks:
       - ecommerce-network
 
+  # Kafka em modo KRaft (sem ZooKeeper): o proprio broker gerencia os metadados.
+  # Node unico, replication-factor 1 -- suficiente para desenvolvimento, nunca para producao.
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: ecommerce-kafka
+    ports:
+      - "9092:9092"     # clientes no host (order-service, inventory-service, CLI)
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      # CONTROLLER liga em localhost (e nao 0.0.0.0) porque, nao estando em
+      # advertised.listeners, o Kafka o anuncia usando o proprio valor daqui --
+      # e anunciar 0.0.0.0 e invalido.
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://localhost:9093,INTERNAL://0.0.0.0:29092
+      # PLAINTEXT e anunciado como localhost (clientes no host);
+      # INTERNAL como kafka:29092 (clientes dentro da rede docker, ex.: kafka-ui).
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # sem espera de rebalance inicial: consumidor sobe e ja consome
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # topico so existe se for criado explicitamente (evita topico criado por typo)
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks:
+      - ecommerce-network
+
+  # Interface web para inspecionar topicos, mensagens, consumer groups e lag.
+  kafka-ui:
+    image: kafbat/kafka-ui:latest
+    container_name: ecommerce-kafka-ui
+    ports:
+      - "8090:8080"     # 8080 no host ja e do api-gateway
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ecommerce
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
 volumes:
   pgdata:
 
