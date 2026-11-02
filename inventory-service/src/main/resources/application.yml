@@ -6,8 +6,9 @@ spring:
     name: inventory-service
   datasource:
     url: jdbc:postgresql://localhost:5433/inventory_db
-    username: root
-    password: password
+    # Padrões só para o docker-compose local; em outro ambiente defina as variáveis.
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
   jpa:
     hibernate:
       ddl-auto: validate
